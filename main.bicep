@@ -2,6 +2,8 @@ targetScope='subscription'
 
 param location string
 param resourceGroupName string
+param existingAVIName string = '' // Set to empty string for new deployment or provide existing AVI resource ID
+param existingAVIResourceGroupName string = '' // Set to empty string for new deployment or provide existing resource group name
 
 resource resourceGroup 'Microsoft.Resources/resourceGroups@2024-03-01' = {
   name: resourceGroupName
@@ -9,13 +11,22 @@ resource resourceGroup 'Microsoft.Resources/resourceGroups@2024-03-01' = {
 }
 
 // Deploy video indexer resources, including associated storage account
-module videoIndexer 'videoindexer.bicep' = {
+module videoIndexer 'videoindexer.bicep' = if (existingAVIName == '') {
   name: 'videoIndexerModule'
   scope: resourceGroup
   params: {
     location: location
     storageAccountName: 'st${uniqueString(resourceGroup.id)}avi'
     videoIndexerAccountName: 'avi-${uniqueString(resourceGroup.id)}'
+  }
+}
+
+module roleAssignment 'videoindexerroleassignment.bicep' = if (existingAVIName == '') {
+  name: 'grant-storage-blob-data-contributor'
+  scope: resourceGroup
+  params: {
+    servicePrincipalObjectId: videoIndexer.outputs.servicePrincipalId
+    storageAccountName: videoIndexer.outputs.storageAccountName
   }
 }
 
@@ -44,20 +55,11 @@ module appConfiguration 'appconfiguration.bicep' = {
       'TranscriptsStorageContainerName'
     ]
     keyValueValues: [
-      resourceGroup.name
-      videoIndexer.outputs.videoIndexerAccountName
+      ((existingAVIName == '') ? resourceGroup.name : existingAVIResourceGroupName)
+      ((existingAVIName == '') ? videoIndexer.outputs.videoIndexerAccountName : existingAVIName)
       subscription().subscriptionId
       storageAcct.outputs.blobContainerUrl
       'full-transcripts'
     ]
-  }
-}
-
-module roleAssignment 'roleassignment.bicep' = {
-  name: 'grant-storage-blob-data-contributor'
-  scope: resourceGroup
-  params: {
-    servicePrincipalObjectId: videoIndexer.outputs.servicePrincipalId
-    storageAccountName: videoIndexer.outputs.storageAccountName
   }
 }
