@@ -26,25 +26,32 @@ def save_full_transcripts(mytimer: func.TimerRequest) -> func.HttpResponse:
 
     # Load configuration from Azure App Configuration
     endpoint = os.environ.get("AZURE_APPCONFIG_ENDPOINT")
-    config = load(endpoint=endpoint, credential=credential)
+    logging.info("Loading configuration from Azure App Configuration.")
+    logging.debug(f"Endpoint: {endpoint}")
 
+    config = load(endpoint=endpoint, credential=credential)
+    logging.info("Configuration loaded successfully.")
+    logging.debug(f"Configuration: {config}")
+
+    # Create Video Indexer Client & authenticate
     consts = Consts(
         config["AVIResourceName"],
         config["AVIResourceGroup"],
         config["AVISubscriptionID"],
     )
-
-    # Create Video Indexer Client & authenticate
     avi_client = VideoIndexerClient()
     avi_client.authenticate_async(consts)
+    logging.info("Authenticated with Video Indexer successfully.")
 
     # Create Blob Service & Container Clients
     blob_service_client = BlobServiceClient(
         config["TranscriptsStorageURL"], credential=credential
     )
+    logging.info("Blob service client created successfully.")
 
     # Get the list of videos
     video_list = avi_client.list_videos_async()
+    logging.info("Fetched video list successfully.")
 
     for video in video_list:
         # Get video details
