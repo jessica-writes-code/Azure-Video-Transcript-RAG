@@ -19,7 +19,7 @@ app = func.FunctionApp()
 
 
 @app.function_name(name="save_full_transcripts")
-@app.timer_trigger(schedule="0 0 * * * *", arg_name="timer", run_on_startup=True)
+@app.timer_trigger(schedule="0 0 0 * * *", arg_name="timer", run_on_startup=True)
 def save_full_transcripts(timer: func.TimerRequest) -> func.HttpResponse:
     logging.info(f"`save_full_transcript` function started at {datetime.now()}.")
     credential = DefaultAzureCredential()
