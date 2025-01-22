@@ -72,3 +72,13 @@ module functionApp 'functionapp.bicep' = {
     location: resourceGroup.location
   }
 }
+
+module functionAppRoleAssignment 'functionapproleassignment.bicep' = {
+  name: 'grant-function-app-accesses'
+  scope: resourceGroup
+  params: {
+    servicePrincipalObjectId: functionApp.outputs.functionAppPrincipalId
+    storageAccountName: storageAcct.outputs.storageAccountName
+    videoIndexerAccountName: ((existingAVIName == '') ? videoIndexer.outputs.videoIndexerAccountName : existingAVIName)
+  }
+}
