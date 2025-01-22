@@ -23,4 +23,5 @@ resource blobContainer 'Microsoft.Storage/storageAccounts/blobServices/container
   properties: {}
 }
 
+output storageAccountName string = storageAcct.name
 output blobContainerUrl string = concat(storageAcct.properties.primaryEndpoints.blob)

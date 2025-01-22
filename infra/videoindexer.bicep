@@ -31,5 +31,5 @@ resource videoIndexer 'Microsoft.VideoIndexer/accounts@2024-01-01' = {
 }
 
 output storageAccountName string = storageAccount.name 
-output videoIndexerAccountName string = videoIndexer.name 
+output videoIndexerAccountName string = videoIndexer.name
 output servicePrincipalId string = videoIndexer.identity.principalId

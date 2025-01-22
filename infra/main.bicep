@@ -21,7 +21,7 @@ module videoIndexer 'videoindexer.bicep' = if (existingAVIName == '') {
   }
 }
 
-module roleAssignment 'videoindexerroleassignment.bicep' = if (existingAVIName == '') {
+module videoIndexerRoleAssignment 'videoindexerroleassignment.bicep' = if (existingAVIName == '') {
   name: 'grant-storage-blob-data-contributor'
   scope: resourceGroup
   params: {
@@ -61,5 +61,24 @@ module appConfiguration 'appconfiguration.bicep' = {
       storageAcct.outputs.blobContainerUrl
       'full-transcripts'
     ]
+  }
+}
+
+// Deploy function app resources
+module functionApp 'functionapp.bicep' = {
+  name: 'functionAppModule'
+  scope: resourceGroup
+  params: {
+    location: resourceGroup.location
+  }
+}
+
+module functionAppRoleAssignment 'functionapproleassignment.bicep' = {
+  name: 'grant-function-app-accesses'
+  scope: resourceGroup
+  params: {
+    functionAppName: functionApp.outputs.functionAppAccountName
+    storageAccountName: storageAcct.outputs.storageAccountName
+    videoIndexerAccountName: ((existingAVIName == '') ? videoIndexer.outputs.videoIndexerAccountName : existingAVIName)
   }
 }
