@@ -1,7 +1,6 @@
 param appConfigurationAccountName string
 param servicePrincipalObjectId string
 param storageAccountName string
-param videoIndexerAccountName string
 
 resource appConfiguration 'Microsoft.AppConfiguration/configurationStores@2024-05-01' existing = {
   name: appConfigurationAccountName
@@ -9,10 +8,6 @@ resource appConfiguration 'Microsoft.AppConfiguration/configurationStores@2024-0
 
 resource storageAccount 'Microsoft.Storage/storageAccounts@2021-02-01' existing = {
   name: storageAccountName
-}
-
-resource videoIndexer 'Microsoft.CognitiveServices/accounts@2021-04-30' existing = {
-  name: videoIndexerAccountName
 }
 
 resource appConfigurationReaderRole 'Microsoft.Authorization/roleAssignments@2020-04-01-preview' = {
@@ -33,11 +28,3 @@ resource storageBlobContributorRole 'Microsoft.Authorization/roleAssignments@202
   }
 }
 
-resource videoIndexerReaderRole 'Microsoft.Authorization/roleAssignments@2020-04-01-preview' = {
-  name: guid(videoIndexer.id, servicePrincipalObjectId, 'Video Indexer Restricted Viewer')
-  properties: {
-    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'a2c4a527-7dc0-4ee3-897b-403ade70fafb')
-    principalId: servicePrincipalObjectId
-    principalType: 'ServicePrincipal'
-  }
-}

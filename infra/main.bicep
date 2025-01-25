@@ -12,7 +12,7 @@ resource resourceGroup 'Microsoft.Resources/resourceGroups@2024-03-01' = {
 
 // Deploy video indexer resources, including associated storage account
 module videoIndexer 'videoindexer.bicep' = if (existingAVIName == '') {
-  name: 'videoIndexerModule'
+  name: 'create-video-indexer'
   scope: resourceGroup
   params: {
     location: location
@@ -21,8 +21,8 @@ module videoIndexer 'videoindexer.bicep' = if (existingAVIName == '') {
   }
 }
 
-module videoIndexerRoleAssignment 'videoindexerroleassignment.bicep' = if (existingAVIName == '') {
-  name: 'grant-storage-blob-data-contributor'
+module videoIndexerNewRoleAssignment 'vinewroleassignment.bicep' = if (existingAVIName == '') {
+  name: 'grant-roles-to-new-video-indexer-roles'
   scope: resourceGroup
   params: {
     servicePrincipalObjectId: videoIndexer.outputs.servicePrincipalId
@@ -32,7 +32,7 @@ module videoIndexerRoleAssignment 'videoindexerroleassignment.bicep' = if (exist
 
 // Deploy independent storage resources
 module storageAcct 'storage.bicep' = {
-  name: 'storageModule'
+  name: 'create-storage'
   scope: resourceGroup
   params: {
     storageLocation: location
@@ -42,7 +42,7 @@ module storageAcct 'storage.bicep' = {
 
 // Deploy app configuration resources
 module appConfiguration 'appconfiguration.bicep' = {
-  name: 'appConfigModule'
+  name: 'create-app-configuration'
   scope: resourceGroup
   params: {
     configStoreName: 'appconfig${uniqueString(resourceGroup.id)}'
@@ -66,7 +66,7 @@ module appConfiguration 'appconfiguration.bicep' = {
 
 // Deploy function app resources
 module functionApp 'functionapp.bicep' = {
-  name: 'functionAppModule'
+  name: 'create-function-app'
   scope: resourceGroup
   params: {
     appConfigurationEndpoint: appConfiguration.outputs.configEndpoint
@@ -74,13 +74,37 @@ module functionApp 'functionapp.bicep' = {
   }
 }
 
+// - Grant all roles, except those related to video indexer -
 module functionAppRoleAssignment 'functionapproleassignment.bicep' = {
-  name: 'grant-function-app-accesses'
+  name: 'grant-roles-to-function-app'
   scope: resourceGroup
   params: {
     servicePrincipalObjectId: functionApp.outputs.functionAppPrincipalId
     appConfigurationAccountName: appConfiguration.outputs.configName
     storageAccountName: storageAcct.outputs.storageAccountName
-    videoIndexerAccountName: ((existingAVIName == '') ? videoIndexer.outputs.videoIndexerAccountName : existingAVIName)
+  }
+}
+
+// - Grant roles related to video indexer, if the video indexer is new -
+module functionAppVIRoleAssignment 'functionappviroleassignment.bicep' = if (existingAVIName == '') {
+  name: 'grant-roles-to-function-app-for-new-video-indexer-access'
+  scope: resourceGroup
+  params: {
+    servicePrincipalObjectId: functionApp.outputs.functionAppPrincipalId
+    videoIndexerName: videoIndexer.outputs.videoIndexerAccountName
+  }
+}
+
+// - Grant roles related to video indexer, if the video indexer is existing -
+resource existingAVIResourceGroup 'Microsoft.Resources/resourceGroups@2024-03-01' existing = {
+  name: existingAVIResourceGroupName
+}
+
+module functionAppExistingVIRoleAssignment 'functionappviroleassignment.bicep' = if (existingAVIName != '') {
+  name: 'grant-existing-video-indexer-roles'
+  scope: existingAVIResourceGroup
+  params: {
+    servicePrincipalObjectId: functionApp.outputs.functionAppPrincipalId
+    videoIndexerName: existingAVIName
   }
 }
