@@ -38,7 +38,7 @@ resource hostingPlan 'Microsoft.Web/serverfarms@2021-03-01' = {
     tier: 'Dynamic'
   }
   properties: {
-    reserved: true
+     reserved: true
   } 
 }
 
