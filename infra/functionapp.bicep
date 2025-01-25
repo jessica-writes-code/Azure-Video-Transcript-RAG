@@ -1,3 +1,4 @@
+param appConfigurationEndpoint string
 param appName string = 'fnapp${uniqueString(resourceGroup().id)}'
 param storageAccountType string = 'Standard_LRS'
 param location string = resourceGroup().location
@@ -5,7 +6,7 @@ param location string = resourceGroup().location
 var functionAppName = appName
 var hostingPlanName = appName
 var applicationInsightsName = appName
-var storageAccountName = '${uniqueString(resourceGroup().id)}azfunctions'
+var storageAccountName = 'st${uniqueString(resourceGroup().id)}func'
 
 resource storageAccount 'Microsoft.Storage/storageAccounts@2022-05-01' = {
   name: storageAccountName
@@ -78,6 +79,10 @@ resource functionApp 'Microsoft.Web/sites@2021-03-01' = {
         {
           name: 'FUNCTIONS_WORKER_RUNTIME'
           value: 'python'
+        }
+        {
+          name: 'AZURE_APPCONFIG_ENDPOINT'
+          value: appConfigurationEndpoint
         }
       ]
     }

@@ -18,3 +18,6 @@ resource configStoreKeyValue 'Microsoft.AppConfiguration/configurationStores/key
     value: keyValueValues[i]
   }
 }]
+
+output configName string = configStore.name
+output configEndpoint string = configStore.properties.endpoint

@@ -69,6 +69,7 @@ module functionApp 'functionapp.bicep' = {
   name: 'functionAppModule'
   scope: resourceGroup
   params: {
+    appConfigurationEndpoint: appConfiguration.outputs.configEndpoint
     location: resourceGroup.location
   }
 }
@@ -78,6 +79,7 @@ module functionAppRoleAssignment 'functionapproleassignment.bicep' = {
   scope: resourceGroup
   params: {
     servicePrincipalObjectId: functionApp.outputs.functionAppPrincipalId
+    appConfigurationAccountName: appConfiguration.outputs.configName
     storageAccountName: storageAcct.outputs.storageAccountName
     videoIndexerAccountName: ((existingAVIName == '') ? videoIndexer.outputs.videoIndexerAccountName : existingAVIName)
   }

@@ -1,6 +1,11 @@
+param appConfigurationAccountName string
 param servicePrincipalObjectId string
 param storageAccountName string
 param videoIndexerAccountName string
+
+resource appConfiguration 'Microsoft.AppConfiguration/configurationStores@2024-05-01' existing = {
+  name: appConfigurationAccountName
+}
 
 resource storageAccount 'Microsoft.Storage/storageAccounts@2021-02-01' existing = {
   name: storageAccountName
@@ -8,6 +13,15 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2021-02-01' existing 
 
 resource videoIndexer 'Microsoft.CognitiveServices/accounts@2021-04-30' existing = {
   name: videoIndexerAccountName
+}
+
+resource appConfigurationReaderRole 'Microsoft.Authorization/roleAssignments@2020-04-01-preview' = {
+  name: guid(appConfiguration.id, servicePrincipalObjectId, 'App Configuration Data Reader')
+  properties: {
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '516239f1-63e1-4d78-a4de-a74fb236a071')
+    principalId: servicePrincipalObjectId
+    principalType: 'ServicePrincipal'
+  }
 }
 
 resource storageBlobContributorRole 'Microsoft.Authorization/roleAssignments@2020-04-01-preview' = {
