@@ -11,6 +11,7 @@ resource resourceGroup 'Microsoft.Resources/resourceGroups@2024-03-01' = {
 }
 
 // Deploy video indexer resources, including associated storage account
+// TODO: Combine the provisioning & role assignment modules into a single module.
 module videoIndexer 'videoindexer.bicep' = if (existingAVIName == '') {
   name: 'create-video-indexer'
   scope: resourceGroup
@@ -75,6 +76,7 @@ module functionApp 'functionapp.bicep' = {
 }
 
 // - Grant all roles, except those related to video indexer -
+// TODO: Break up the two role assignments into separate modules.
 module functionAppRoleAssignment 'functionapproleassignment.bicep' = {
   name: 'grant-roles-to-function-app'
   scope: resourceGroup
@@ -86,6 +88,7 @@ module functionAppRoleAssignment 'functionapproleassignment.bicep' = {
 }
 
 // - Grant roles related to video indexer, if the video indexer is new -
+// TODO: Combine the new/existing role assignment modules into a single module.
 module functionAppVIRoleAssignment 'functionappviroleassignment.bicep' = if (existingAVIName == '') {
   name: 'grant-roles-to-function-app-for-new-video-indexer-access'
   scope: resourceGroup
