@@ -1,5 +1,5 @@
-param appConfigurationAccountName string
 param servicePrincipalObjectId string
+param appConfigurationAccountName string
 param storageAccountName string
 
 resource appConfiguration 'Microsoft.AppConfiguration/configurationStores@2024-05-01' existing = {
