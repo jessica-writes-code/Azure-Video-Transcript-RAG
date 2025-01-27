@@ -108,3 +108,13 @@ module functionAppExistingVIRoleAssignment 'functionappviroleassignment.bicep' =
     videoIndexerName: existingAVIName
   }
 }
+
+// Deploy search resources
+module search 'srch.bicep' = {
+  name: 'create-search-service'
+  scope: resourceGroup
+  params: {
+    name: 'srch${uniqueString(resourceGroup.id)}'
+    location: location
+  }
+}
