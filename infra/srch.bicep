@@ -16,3 +16,5 @@ resource search 'Microsoft.Search/searchServices@2020-08-01' = {
     type: 'SystemAssigned'
   }
 }
+
+output servicePrincipalId string = search.identity.principalId

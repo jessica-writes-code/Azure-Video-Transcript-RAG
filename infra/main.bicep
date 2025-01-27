@@ -118,3 +118,12 @@ module search 'srch.bicep' = {
     location: location
   }
 }
+
+module searchRoleAssignment 'st-reader-role-assignment.bicep' = {
+  name: 'grant-search-service-read-access-to-storage'
+  scope: resourceGroup
+  params: {
+    servicePrincipalId: search.outputs.servicePrincipalId
+    storageAccountName: storageAcct.outputs.storageAccountName
+  }
+}
