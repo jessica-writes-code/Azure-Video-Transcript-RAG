@@ -23,7 +23,7 @@ module videoIndexer 'avi.bicep' = if (existingAVIName == '') {
 }
 
 // Deploy independent storage resources
-module storageAcct 'storage.bicep' = {
+module storageAcct 'st.bicep' = {
   name: 'create-storage'
   scope: resourceGroup
   params: {
