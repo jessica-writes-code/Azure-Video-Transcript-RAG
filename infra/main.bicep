@@ -131,3 +131,12 @@ module searchRoleAssignment 'st-reader-role-assignment.bicep' = {
     storageAccountName: storageAcct.outputs.storageAccountName
   }
 }
+
+module oaiRoleAssignment 'oai-user-role-assignment.bicep' = {
+  name: 'grant-openai-user-role-to-search-service'
+  scope: resourceGroup
+  params: {
+    servicePrincipalId: search.outputs.servicePrincipalId
+    oaiAccountName: openAI.outputs.openAIAccountName
+  }
+}
