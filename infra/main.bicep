@@ -12,22 +12,13 @@ resource resourceGroup 'Microsoft.Resources/resourceGroups@2024-03-01' = {
 
 // Deploy video indexer resources, including associated storage account
 // TODO: Combine the provisioning & role assignment modules into a single module.
-module videoIndexer 'videoindexer.bicep' = if (existingAVIName == '') {
+module videoIndexer 'avi.bicep' = if (existingAVIName == '') {
   name: 'create-video-indexer'
   scope: resourceGroup
   params: {
     location: location
     storageAccountName: 'st${uniqueString(resourceGroup.id)}avi'
     videoIndexerAccountName: 'avi-${uniqueString(resourceGroup.id)}'
-  }
-}
-
-module videoIndexerNewRoleAssignment 'vinewroleassignment.bicep' = if (existingAVIName == '') {
-  name: 'grant-roles-to-new-video-indexer-roles'
-  scope: resourceGroup
-  params: {
-    servicePrincipalObjectId: videoIndexer.outputs.servicePrincipalId
-    storageAccountName: videoIndexer.outputs.storageAccountName
   }
 }
 

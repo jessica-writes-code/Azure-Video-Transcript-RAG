@@ -2,6 +2,7 @@ param location string
 param storageAccountName string
 param videoIndexerAccountName string
 
+var storageBlobDataContributorRoleId = 'ba92f5b4-2d11-453d-a403-e96b0029c9fe' 
 var storageKind = 'StorageV2' 
 var storageSku = 'Standard_LRS'
 
@@ -30,6 +31,14 @@ resource videoIndexer 'Microsoft.VideoIndexer/accounts@2024-01-01' = {
   }
 }
 
-output storageAccountName string = storageAccount.name 
+resource roleAssignment 'Microsoft.Authorization/roleAssignments@2020-04-01-preview' = {
+  name: guid(storageAccount.id, videoIndexerAccountName, 'Storage Blob Data Contributor')
+  scope: storageAccount
+  properties: {
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', storageBlobDataContributorRoleId)
+    principalId: videoIndexer.identity.principalId
+    principalType: 'ServicePrincipal'
+  }
+}
+
 output videoIndexerAccountName string = videoIndexer.name
-output servicePrincipalId string = videoIndexer.identity.principalId
