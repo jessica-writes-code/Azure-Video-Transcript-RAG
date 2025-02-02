@@ -103,6 +103,16 @@ module functionAppExistingVIRoleAssignment 'functionappviroleassignment.bicep' =
   }
 }
 
+// Deploy OpenAI resources
+module openAI 'oai.bicep' = {
+  name: 'create-openai-resources'
+  scope: resourceGroup
+  params: {
+    location: location
+    openAIAccountName: 'oai-${uniqueString(resourceGroup.id)}'
+  }
+}
+
 // Deploy search resources
 module search 'srch.bicep' = {
   name: 'create-search-service'
@@ -114,7 +124,7 @@ module search 'srch.bicep' = {
 }
 
 module searchRoleAssignment 'st-reader-role-assignment.bicep' = {
-  name: 'grant-search-service-read-access-to-storage'
+  name: 'grant-storage-read-access-to-search-service'
   scope: resourceGroup
   params: {
     servicePrincipalId: search.outputs.servicePrincipalId
