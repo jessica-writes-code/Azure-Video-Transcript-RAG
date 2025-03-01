@@ -1,4 +1,4 @@
-// This Bicep file creates a role assignment for a service to read from a storage account.
+// This Bicep file creates a role assignment for a service to read from, write to, or delete from from a storage account.
 param servicePrincipalId string
 param storageAccountName string
 
@@ -7,9 +7,9 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2021-04-01' existing 
 }
 
 resource roleAssignment 'Microsoft.Authorization/roleAssignments@2020-04-01-preview' = {
-  name: guid(storageAccount.id, servicePrincipalId, 'Storage Blob Data Reader')
+  name: guid(storageAccount.id, servicePrincipalId, 'Storage Blob Data Contributor')
   properties: {
-    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '2a2b9908-6ea1-4ae2-8e65-a410df84e7d1')
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'ba92f5b4-2d11-453d-a403-e96b0029c9fe')
     principalId: servicePrincipalId
     principalType: 'ServicePrincipal'
   }

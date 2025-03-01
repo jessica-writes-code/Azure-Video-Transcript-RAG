@@ -133,8 +133,8 @@ module search 'srch.bicep' = {
   }
 }
 
-module searchRoleAssignment 'st-reader-role-assignment.bicep' = {
-  name: 'grant-storage-read-access-to-search-service'
+module searchRoleAssignment 'st-contributor-role-assignment.bicep' = {
+  name: 'grant-storage-contributor-access-to-search-service'
   scope: resourceGroup
   params: {
     servicePrincipalId: search.outputs.servicePrincipalId
