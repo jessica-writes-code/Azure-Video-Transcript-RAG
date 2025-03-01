@@ -201,7 +201,6 @@ def create_skillset(
     )
 
     indexer_client.create_or_update_skillset(skillset)
-    print(f"{skillset.name} created")
 
 
 def create_indexer(
@@ -233,9 +232,6 @@ def create_indexer(
     )
 
     indexer_client.create_or_update_indexer(indexer)
-    print(
-        f"{INDEXER_NAME} is created and running. Give the indexer a few minutes before running a query."
-    )
 
 
 if __name__ == "__main__":
