@@ -4,7 +4,9 @@ This project is a work-in-progress effort to create a retrieval-augmented genera
 
 ## How To
 
-Deploy the infrastructure.
+1. Set up the Python environment, activate it, and install requirements from requirements.txt.
+
+2. Deploy the infrastructure.
 
 ```
 az deployment sub create
@@ -18,9 +20,20 @@ existingAVIName=<ExistingAzureVideoIndexer> (Optional)
 existingAVIResourceGroupName=<ExistingAzureVideoIndexerRG> (Optional)
 ```
 
-Deploy the function.
+3. Deploy the transcript extraction function to Azure Function App.
 
 ```
 func azure functionapp publish <AppConfigName>
 ```
 
+4. Deploy the Azure AI Search components - data source, skill set, indexer.
+
+a. Collect the information you'll need for deployment of Azure AI Search components.
+    - SearchURL. This should be of the form https://<SearchResourceName>.search.windows.net.
+    - SearchAPIKey. This should be a long alpha-numeric string.
+    - OpenAIURL. This should be of the form https://<OpenAIResourceName>.openai.azure.com.
+
+c. 
+```
+python srch/setup.py --srch-url <SearchURL> --srch-api-key <SearchAPIKey> --openai-url <OpenAIURL>
+```
