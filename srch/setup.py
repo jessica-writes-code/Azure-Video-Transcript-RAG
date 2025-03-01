@@ -2,7 +2,6 @@
 import argparse
 
 from azure.core.credentials import AzureKeyCredential
-from azure.identity import get_bearer_token_provider
 from azure.search.documents.indexes import SearchIndexClient
 from azure.search.documents.indexes.models import (
     SearchField,
@@ -14,11 +13,15 @@ from azure.search.documents.indexes.models import (
     AzureOpenAIVectorizerParameters,
     SearchIndex,
 )
+from azure.search.documents.indexes import SearchIndexerClient
+from azure.search.documents.indexes.models import (
+    SearchIndexerDataContainer,
+    SearchIndexerDataSourceConnection,
+)
 
 
 def create_index(
-    srch_url: str,
-    srch_api_key: str,
+    index_client: SearchIndexClient,
     openai_url: str,
 ) -> None:
     """
@@ -34,7 +37,6 @@ def create_index(
 
     # Create a search index
     index_name = "rag-transcript-index"
-    index_client = SearchIndexClient(srch_url, AzureKeyCredential(srch_api_key))
     fields = [
         SearchField(name="parent_id", type=SearchFieldDataType.String),
         SearchField(name="title", type=SearchFieldDataType.String),
@@ -92,14 +94,48 @@ def create_index(
     index_client.create_or_update_index(index)
 
 
+def create_datasource(
+    indexer_client: SearchIndexerClient, st_connection_string: str
+) -> None:
+    """
+    TODO
+    """
+
+    # Create a data source
+    container = SearchIndexerDataContainer(name="full-transcripts")
+    data_source_connection = SearchIndexerDataSourceConnection(
+        name="rag-transcript-ds",
+        type="azureblob",
+        connection_string=st_connection_string,
+        container=container,
+    )
+    data_source = indexer_client.create_or_update_data_source_connection(
+        data_source_connection
+    )
+
+    print(f"Data source '{data_source.name}' created or updated")
+
+
 if __name__ == "__main__":
     # Parse input arguments
     parser = argparse.ArgumentParser()
     parser.add_argument("--srch-url", type=str, required=True)
     parser.add_argument("--srch-api-key", type=str, required=True)
     parser.add_argument("--openai-url", type=str, required=True)
+    parser.add_argument("--st-connection-string", type=str, required=True)
 
     args = parser.parse_args()
 
     # Execute setup
-    create_index(args.srch_url, args.srch_api_key, args.openai_url)
+    # - Create index
+    index_client = SearchIndexClient(
+        args.srch_url, AzureKeyCredential(args.srch_api_key)
+    )
+    create_index(index_client, args.openai_url)
+
+    # - Create data source
+    indexer_client = SearchIndexerClient(
+        args.srch_url, AzureKeyCredential(args.srch_api_key)
+    )
+    print(args.st_connection_string)
+    create_datasource(indexer_client, args.st_connection_string)
