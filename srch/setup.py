@@ -2,7 +2,7 @@
 import argparse
 
 from azure.core.credentials import AzureKeyCredential
-from azure.search.documents.indexes import SearchIndexClient
+from azure.search.documents.indexes import SearchIndexClient, SearchIndexerClient
 from azure.search.documents.indexes.models import (
     SearchField,
     SearchFieldDataType,
@@ -12,12 +12,22 @@ from azure.search.documents.indexes.models import (
     AzureOpenAIVectorizer,
     AzureOpenAIVectorizerParameters,
     SearchIndex,
-)
-from azure.search.documents.indexes import SearchIndexerClient
-from azure.search.documents.indexes.models import (
     SearchIndexerDataContainer,
     SearchIndexerDataSourceConnection,
+    SplitSkill,
+    InputFieldMappingEntry,
+    OutputFieldMappingEntry,
+    AzureOpenAIEmbeddingSkill,
+    SearchIndexerIndexProjection,
+    SearchIndexerIndexProjectionSelector,
+    SearchIndexerIndexProjectionsParameters,
+    IndexProjectionMode,
+    SearchIndexerSkillset,
+    CognitiveServicesAccountKey,
 )
+
+
+INDEX_NAME = "rag-transcript-index"
 
 
 def create_index(
@@ -28,15 +38,13 @@ def create_index(
     Creates an Azure Search index for RAG.
 
     Args:
-        srch_url (str): Azure Search service URL.
-        srch_api_key (str): Azure Search service API key.
-        openai_url (str): OpenAI service URL.
+        index_client (SearchIndexClient): Azure Search index client.
+        openai_url (str): Azure OpenAI resource URL.
     Returns:
         None
     """
 
     # Create a search index
-    index_name = "rag-transcript-index"
     fields = [
         SearchField(name="parent_id", type=SearchFieldDataType.String),
         SearchField(name="title", type=SearchFieldDataType.String),
@@ -90,7 +98,7 @@ def create_index(
     )
 
     # Create the search index
-    index = SearchIndex(name=index_name, fields=fields, vector_search=vector_search)
+    index = SearchIndex(name=INDEX_NAME, fields=fields, vector_search=vector_search)
     index_client.create_or_update_index(index)
 
 
@@ -98,10 +106,14 @@ def create_datasource(
     indexer_client: SearchIndexerClient, st_connection_string: str
 ) -> None:
     """
-    TODO
-    """
+    Creates an Azure Search data source for RAG.
 
-    # Create a data source
+    Args:
+        indexer_client (SearchIndexerClient): Azure Search indexer client.
+        st_connection_string (str): Azure Storage connection string.
+    Returns:
+        None
+    """
     container = SearchIndexerDataContainer(name="full-transcripts")
     data_source_connection = SearchIndexerDataSourceConnection(
         name="rag-transcript-ds",
@@ -109,11 +121,77 @@ def create_datasource(
         connection_string=st_connection_string,
         container=container,
     )
-    data_source = indexer_client.create_or_update_data_source_connection(
-        data_source_connection
+    indexer_client.create_or_update_data_source_connection(data_source_connection)
+
+
+def create_skillset(indexer_client: SearchIndexerClient) -> None:
+    """TODO"""
+
+    # Create a skillset
+    skillset_name = "rag-transcript-ss"
+
+    split_skill = SplitSkill(
+        description="Split skill to chunk documents",
+        text_split_mode="pages",
+        context="/document",
+        maximum_page_length=2000,
+        page_overlap_length=500,
+        inputs=[
+            InputFieldMappingEntry(name="text", source="/document/content"),
+        ],
+        outputs=[OutputFieldMappingEntry(name="textItems", target_name="pages")],
     )
 
-    print(f"Data source '{data_source.name}' created or updated")
+    embedding_skill = AzureOpenAIEmbeddingSkill(
+        description="Skill to generate embeddings via Azure OpenAI",
+        context="/document/pages/*",
+        resource_url=args.openai_url,
+        deployment_name="text-embedding-3-large",
+        model_name="text-embedding-3-large",
+        dimensions=1024,
+        inputs=[
+            InputFieldMappingEntry(name="text", source="/document/pages/*"),
+        ],
+        outputs=[OutputFieldMappingEntry(name="embedding", target_name="text_vector")],
+    )
+
+    index_projections = SearchIndexerIndexProjection(
+        selectors=[
+            SearchIndexerIndexProjectionSelector(
+                target_index_name=INDEX_NAME,
+                parent_key_field_name="parent_id",
+                source_context="/document/pages/*",
+                mappings=[
+                    InputFieldMappingEntry(name="chunk", source="/document/pages/*"),
+                    InputFieldMappingEntry(
+                        name="text_vector", source="/document/pages/*/text_vector"
+                    ),
+                    InputFieldMappingEntry(
+                        name="locations", source="/document/pages/*/locations"
+                    ),
+                    InputFieldMappingEntry(
+                        name="title", source="/document/metadata_storage_name"
+                    ),
+                ],
+            ),
+        ],
+        parameters=SearchIndexerIndexProjectionsParameters(
+            projection_mode=IndexProjectionMode.SKIP_INDEXING_PARENT_DOCUMENTS
+        ),
+    )
+
+    skills = [split_skill, embedding_skill]
+
+    skillset = SearchIndexerSkillset(
+        name=skillset_name,
+        description="Skillset to chunk documents and generating embeddings",
+        skills=skills,
+        index_projection=index_projections,
+        cognitive_services_account=cognitive_services_account,
+    )
+
+    indexer_client.create_or_update_skillset(skillset)
+    print(f"{skillset.name} created")
 
 
 if __name__ == "__main__":
@@ -123,6 +201,7 @@ if __name__ == "__main__":
     parser.add_argument("--srch-api-key", type=str, required=True)
     parser.add_argument("--openai-url", type=str, required=True)
     parser.add_argument("--st-connection-string", type=str, required=True)
+    parser.add_argument("--ai-multiservice-account-key", type=str, required=True)
 
     args = parser.parse_args()
 
@@ -137,5 +216,10 @@ if __name__ == "__main__":
     indexer_client = SearchIndexerClient(
         args.srch_url, AzureKeyCredential(args.srch_api_key)
     )
-    print(args.st_connection_string)
     create_datasource(indexer_client, args.st_connection_string)
+
+    # - Create skillset
+    cognitive_services_account = CognitiveServicesAccountKey(
+        key=args.ai_multiservice_account_key
+    )
+    create_skillset(indexer_client, args.openai_url, cognitive_services_account)
