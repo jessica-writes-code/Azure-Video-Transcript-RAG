@@ -24,7 +24,7 @@ existingAVIResourceGroupName=<ExistingAzureVideoIndexerRG> (Optional)
 
 ```
 cd functions/etl
-func azure functionapp publish <AppConfigName>
+func azure functionapp publish <FunctionAppName>
 ```
 
 4. Deploy the Azure AI Search components - data source, skill set, indexer.
