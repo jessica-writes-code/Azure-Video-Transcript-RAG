@@ -10,7 +10,7 @@ resource account 'Microsoft.CognitiveServices/accounts@2023-05-01' = {
   sku: {
     name: 'S0'
   }
-  kind: 'AIServices'
+  kind: 'CognitiveServices'
   properties: {
     publicNetworkAccess: 'Enabled'
   }
