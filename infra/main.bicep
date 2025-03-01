@@ -103,6 +103,16 @@ module functionAppExistingVIRoleAssignment 'functionappviroleassignment.bicep' =
   }
 }
 
+// Deploy AI Services (Multiservice)
+module aiServices 'ais.bicep' = {
+  name: 'create-ai-services'
+  scope: resourceGroup
+  params: {
+    location: location
+    aiServicesName: 'ais-${uniqueString(resourceGroup.id)}'
+  }
+}
+
 // Deploy OpenAI resources
 module openAI 'oai.bicep' = {
   name: 'create-openai-resources'
