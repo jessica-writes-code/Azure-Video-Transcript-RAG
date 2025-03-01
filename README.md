@@ -34,8 +34,9 @@ a. Collect the information you'll need for deployment of Azure AI Search compone
     - SearchAPIKey. This should be a long alpha-numeric string, found under "Settings" -> "Keys".
     - OpenAIURL. This should be of the form https://<OpenAIResourceName>.openai.azure.com.
     - StorageConnectionString. This should be the connection string for the primary storage account, found under "Security + networking" -> "Access keys".
+    - AIMultiserviceKey. This should be a long alpha-numeric string, found under "Resource Management" -> "Keys and Endpoints".
 
 c. 
 ```
-python srch/setup.py --srch-url "<SearchURL>" --srch-api-key "<SearchAPIKey>" --openai-url "<OpenAIURL>" --st-connection-string "<StorageConnectionString>"
+python srch/setup.py --srch-url "<SearchURL>" --srch-api-key "<SearchAPIKey>" --openai-url "<OpenAIURL>" --st-connection-string "<StorageConnectionString>" --ai-multiservice-account-key "<AIMultiserviceKey>"
 ```
