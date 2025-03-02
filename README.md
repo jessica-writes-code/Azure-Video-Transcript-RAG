@@ -2,7 +2,11 @@
 
 This project is a work-in-progress effort to create a retrieval-augmented generation (RAG) large language model (LLM) system using transcripts from Azure Video Indexer.
 
-## How To
+## Architecture
+
+![architecture diagram](./assets/diagram.png)
+
+## Deployment Process
 
 1. Set up the Python environment, activate it, and install requirements from requirements.txt.
 
