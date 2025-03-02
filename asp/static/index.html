@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Embolden Valor Transcript Search</title>
+    <style>
+        body {
+            background-color: #121212;
+            color: #e0e0e0;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        h1, h2 {
+            text-align: center;
+        }
+        #userInput {
+            width: 80%;
+            margin: 10px 0;
+            background-color: #333;
+            color: #e0e0e0;
+            border: 1px solid #444;
+            padding: 10px;
+        }
+        button {
+            background-color: #444;
+            color: #e0e0e0;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #555;
+        }
+        #message, #chatResponse {
+            width: 80%;
+            margin: 10px 0;
+            padding: 10px;
+            background-color: #333;
+            border: 1px solid #444;
+        }
+    </style>
+</head>
+<body>
+    <h1>Embolden Valor Transcript Search</h1>
+    <h2>What transcript content would you like to search for?</h2>
+    <textarea id="userInput" rows="10" cols="50"></textarea><br>
+    <button onclick="sendMessage()">Send</button>
+    <div id="chatResponse"></div>
+
+    <script>
+        async function sendMessage() {
+            const userInput = document.getElementById("userInput").value;
+            const response = await fetch("/api/search", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ message: userInput })
+            });
+            const data = await response.json();
+            document.getElementById("chatResponse").textContent = data.response;
+        }
+
+        fetchMessage();
+    </script>
+</body>
+</html>
