@@ -65,7 +65,7 @@ def save_full_transcripts(timer: func.TimerRequest) -> func.HttpResponse:
             continue
 
         # Check if the transcript already exists in the blob storage; if so, skip it
-        file_name = f"{video_name}. txt"
+        file_name = f"{video_name}.txt"
         logging.info(f"Checking if transcript for {video_name} exists in blob storage.")
 
         blob_client = blob_service_client.get_blob_client(

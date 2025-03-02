@@ -11,7 +11,8 @@ resource resourceGroup 'Microsoft.Resources/resourceGroups@2024-03-01' = {
 }
 
 // Deploy video indexer resources, including associated storage account
-module videoIndexer 'videoindexer.bicep' = if (existingAVIName == '') {
+// TODO: Combine the provisioning & role assignment modules into a single module.
+module videoIndexer 'avi.bicep' = if (existingAVIName == '') {
   name: 'create-video-indexer'
   scope: resourceGroup
   params: {
@@ -21,17 +22,8 @@ module videoIndexer 'videoindexer.bicep' = if (existingAVIName == '') {
   }
 }
 
-module videoIndexerNewRoleAssignment 'vinewroleassignment.bicep' = if (existingAVIName == '') {
-  name: 'grant-roles-to-new-video-indexer-roles'
-  scope: resourceGroup
-  params: {
-    servicePrincipalObjectId: videoIndexer.outputs.servicePrincipalId
-    storageAccountName: videoIndexer.outputs.storageAccountName
-  }
-}
-
 // Deploy independent storage resources
-module storageAcct 'storage.bicep' = {
+module storageAcct 'st.bicep' = {
   name: 'create-storage'
   scope: resourceGroup
   params: {
@@ -75,6 +67,7 @@ module functionApp 'functionapp.bicep' = {
 }
 
 // - Grant all roles, except those related to video indexer -
+// TODO: Break up the two role assignments into separate modules.
 module functionAppRoleAssignment 'functionapproleassignment.bicep' = {
   name: 'grant-roles-to-function-app'
   scope: resourceGroup
@@ -86,6 +79,7 @@ module functionAppRoleAssignment 'functionapproleassignment.bicep' = {
 }
 
 // - Grant roles related to video indexer, if the video indexer is new -
+// TODO: Combine the new/existing role assignment modules into a single module.
 module functionAppVIRoleAssignment 'functionappviroleassignment.bicep' = if (existingAVIName == '') {
   name: 'grant-roles-to-function-app-for-new-video-indexer-access'
   scope: resourceGroup
@@ -106,5 +100,53 @@ module functionAppExistingVIRoleAssignment 'functionappviroleassignment.bicep' =
   params: {
     servicePrincipalObjectId: functionApp.outputs.functionAppPrincipalId
     videoIndexerName: existingAVIName
+  }
+}
+
+// Deploy AI Services (Multiservice)
+module aiServices 'ais.bicep' = {
+  name: 'create-ai-services'
+  scope: resourceGroup
+  params: {
+    location: location
+    aiServicesName: 'ais-${uniqueString(resourceGroup.id)}'
+  }
+}
+
+// Deploy OpenAI resources
+module openAI 'oai.bicep' = {
+  name: 'create-openai-resources'
+  scope: resourceGroup
+  params: {
+    location: location
+    openAIAccountName: 'oai-${uniqueString(resourceGroup.id)}'
+  }
+}
+
+// Deploy search resources
+module search 'srch.bicep' = {
+  name: 'create-search-service'
+  scope: resourceGroup
+  params: {
+    name: 'srch${uniqueString(resourceGroup.id)}'
+    location: location
+  }
+}
+
+module searchRoleAssignment 'st-contributor-role-assignment.bicep' = {
+  name: 'grant-storage-contributor-access-to-search-service'
+  scope: resourceGroup
+  params: {
+    servicePrincipalId: search.outputs.servicePrincipalId
+    storageAccountName: storageAcct.outputs.storageAccountName
+  }
+}
+
+module oaiRoleAssignment 'oai-user-role-assignment.bicep' = {
+  name: 'grant-openai-user-role-to-search-service'
+  scope: resourceGroup
+  params: {
+    servicePrincipalId: search.outputs.servicePrincipalId
+    oaiAccountName: openAI.outputs.openAIAccountName
   }
 }
