@@ -1,7 +1,7 @@
 param openAIAccountName string
 param location string
 
-resource openAIAccount 'Microsoft.CognitiveServices/accounts@2024-04-01-preview' = {
+resource openAIAccount 'Microsoft.CognitiveServices/accounts@2023-05-01' = {
   name: openAIAccountName
   location: location
   identity: {
@@ -16,7 +16,7 @@ resource openAIAccount 'Microsoft.CognitiveServices/accounts@2024-04-01-preview'
   }
 }
 
-resource embedding 'Microsoft.CognitiveServices/accounts/deployments@2024-04-01-preview' = {
+resource embedding 'Microsoft.CognitiveServices/accounts/deployments@2023-05-01' = {
   parent: openAIAccount
   name: 'text-embedding-3-large'
   properties: {
@@ -33,3 +33,4 @@ resource embedding 'Microsoft.CognitiveServices/accounts/deployments@2024-04-01-
 }
 
 output openAIAccountName string = openAIAccount.name
+
