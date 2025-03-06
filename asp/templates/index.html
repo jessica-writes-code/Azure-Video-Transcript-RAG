@@ -39,7 +39,9 @@
     
     {% if search_result %}
     <div class="result">
-        <p>{{ search_result }}</p>
+        {% for item in search_result %}
+            <p>{{ item }}</p>
+        {% endfor %}
     </div>
     {% endif %}
 </body>

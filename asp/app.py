@@ -25,7 +25,14 @@ async def home(request: Request):
 async def search(request: Request, user_input: str = Form(...)):
     return templates.TemplateResponse(
         "index.html",
-        {"request": request, "search_result": f'"{user_input}" is what you entered.'},
+        {
+            "request": request,
+            "search_result": [
+                f'"{user_input}" is what you entered.',
+                "Thing2",
+                "Thing3",
+            ],
+        },
     )
 
 
