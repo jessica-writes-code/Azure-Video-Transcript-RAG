@@ -33,7 +33,7 @@ module storageAcct 'st.bicep' = {
 }
 
 // Deploy app configuration resources
-module appConfiguration 'appconfiguration.bicep' = {
+module appConfiguration 'appcs.bicep' = {
   name: 'create-app-configuration'
   scope: resourceGroup
   params: {

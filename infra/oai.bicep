@@ -13,6 +13,7 @@ resource openAIAccount 'Microsoft.CognitiveServices/accounts@2024-04-01-preview'
   kind: 'OpenAI'
   properties: {
     publicNetworkAccess: 'Enabled'
+    customSubDomainName : openAIAccountName
   }
 }
 
