@@ -30,16 +30,16 @@
     </style>
 </head>
 <body>
-    <h1>Echo App</h1>
+    <h1>Embolden Valor Transcript Search</h1>
     
-    <form action="/echo" method="post">
-        <input type="text" name="user_input" placeholder="Enter something..." required>
+    <form action="/search" method="post">
+        <input type="text" name="user_input" placeholder="What would you like to search the transcript database for?" required>
         <button type="submit">Submit</button>
     </form>
     
-    {% if echo_message %}
+    {% if search_result %}
     <div class="result">
-        <p>{{ echo_message }}</p>
+        <p>{{ search_result }}</p>
     </div>
     {% endif %}
 </body>

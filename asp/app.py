@@ -21,11 +21,11 @@ async def home(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
 
-@app.post("/echo", response_class=HTMLResponse)
-async def echo(request: Request, user_input: str = Form(...)):
+@app.post("/search", response_class=HTMLResponse)
+async def search(request: Request, user_input: str = Form(...)):
     return templates.TemplateResponse(
         "index.html",
-        {"request": request, "echo_message": f'"{user_input}" is what you entered.'},
+        {"request": request, "search_result": f'"{user_input}" is what you entered.'},
     )
 
 
