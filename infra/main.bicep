@@ -57,7 +57,7 @@ module appConfiguration 'appcs.bicep' = {
 }
 
 // Deploy function app resources
-module functionApp 'functionapp.bicep' = {
+module functionApp 'func.bicep' = {
   name: 'create-function-app'
   scope: resourceGroup
   params: {
@@ -68,7 +68,7 @@ module functionApp 'functionapp.bicep' = {
 
 // - Grant all roles, except those related to video indexer -
 // TODO: Break up the two role assignments into separate modules.
-module functionAppRoleAssignment 'functionapproleassignment.bicep' = {
+module functionAppRoleAssignment 'func-role-assignment.bicep' = {
   name: 'grant-roles-to-function-app'
   scope: resourceGroup
   params: {
@@ -80,7 +80,7 @@ module functionAppRoleAssignment 'functionapproleassignment.bicep' = {
 
 // - Grant roles related to video indexer, if the video indexer is new -
 // TODO: Combine the new/existing role assignment modules into a single module.
-module functionAppVIRoleAssignment 'functionappviroleassignment.bicep' = if (existingAVIName == '') {
+module functionAppVIRoleAssignment 'func-avi-role-assignment.bicep' = if (existingAVIName == '') {
   name: 'grant-roles-to-function-app-for-new-video-indexer-access'
   scope: resourceGroup
   params: {
@@ -94,7 +94,7 @@ resource existingAVIResourceGroup 'Microsoft.Resources/resourceGroups@2024-03-01
   name: existingAVIResourceGroupName
 }
 
-module functionAppExistingVIRoleAssignment 'functionappviroleassignment.bicep' = if (existingAVIName != '') {
+module functionAppExistingVIRoleAssignment 'func-avi-role-assignment.bicep' = if (existingAVIName != '') {
   name: 'grant-existing-video-indexer-roles'
   scope: existingAVIResourceGroup
   params: {
