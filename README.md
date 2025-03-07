@@ -27,7 +27,7 @@ existingAVIResourceGroupName=<ExistingAzureVideoIndexerRG> (Optional)
 3. Deploy the transcript extraction function to Azure Function App.
 
 ```
-cd functions/etl
+cd func/etl
 func azure functionapp publish <FunctionAppName>
 ```
 
